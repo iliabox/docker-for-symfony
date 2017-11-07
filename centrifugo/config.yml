@@ -1,0 +1,14 @@
+log_level: debug
+
+admin_password: admin
+admin_secret: admin_secret
+
+secret: secret
+namespaces:
+  - name: public
+    publish: true
+    watch: true
+    presence: true
+    join_leave: true
+    history_size: 10
+    history_lifetime: 30

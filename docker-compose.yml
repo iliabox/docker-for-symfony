@@ -1,0 +1,62 @@
+version: '2'
+
+services:
+    db:
+        container_name: sf_pgsql
+        image: postgres:9
+        volumes:
+            - "./data/db:/var/lib/postgresql"
+        environment:
+            POSTGRES_DB: ${DB}
+            POSTGRES_USER: ${DB_USER}
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
+        ports:
+            - "5432:5432"
+    redis:
+        container_name: sf_redis
+        image: redis:alpine
+        ports:
+            - "6379:6379"
+    php:
+        container_name: sf_phpfpm
+        build:
+            context: php7-fpm
+            args:
+                TIMEZONE: ${TIMEZONE}
+        volumes:
+            - ${SYMFONY_APP_PATH}:/var/www/symfony
+            - ./logs/symfony:/var/www/symfony/app/logs
+        links:
+            - redis
+            - db
+            - centrifugo
+    nginx:
+        container_name: sf_nginx
+        build:
+            context: nginx
+            args:
+                MAX_EXECUTION_TIME: ${MAX_EXECUTION_TIME}
+        ports:
+            - "80:80"
+        volumes_from:
+            - php
+        volumes:
+            - ./logs/nginx/:/var/log/nginx
+    centrifugo:
+        container_name: sf_centrifugo
+        image: fzambia/centrifugo:latest
+        command: centrifugo -c config.yml -w --port=8000  --log_level=debug --debug --insecure --address=0.0.0.0
+        ports:
+            - "7000:8000"
+        volumes:
+            - ./centrifugo/config.yml:/centrifugo/config.yml   # centrifugo -c config.json -w /opt/centrifugo/web
+    rabbit:
+        container_name: sf_rabbit
+        hostname: rabbit
+        image: rabbitmq:3-management
+        environment:
+            RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+            RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+        ports:
+            - "5672:5672"
+            - "15672:15672"
