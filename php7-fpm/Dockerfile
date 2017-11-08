@@ -1,7 +1,7 @@
 FROM php:7.1-fpm
 ARG TIMEZONE
 
-RUN apt-get update && apt-get install -y git unzip openssl libpq-dev
+RUN apt-get update && apt-get install -y vim git unzip openssl libpq-dev
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -12,7 +12,7 @@ RUN ln -snf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && echo ${TIMEZONE} >
 RUN printf '[PHP]\ndate.timezone = "%s"\n', ${TIMEZONE} > /usr/local/etc/php/conf.d/tzone.ini
 
 # Install PDO extensions
-RUN docker-php-ext-install pdo pdo_pgsql
+RUN docker-php-ext-install pdo_pgsql
 
 # Install xdebug
 RUN pecl install xdebug
@@ -29,6 +29,9 @@ RUN echo "xdebug.remote_port=9001" >> /usr/local/etc/php/conf.d/docker-php-ext-x
 RUN pecl install -o -f redis \
 &&  rm -rf /tmp/pear \
 &&  docker-php-ext-enable redis
+
+# Install pcntl
+#RUN docker-php-ext-install pcntl
 
 # Create an alias for Symfony3 console
 RUN echo 'alias sf="php bin/console"' >> ~/.bashrc

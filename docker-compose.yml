@@ -23,28 +23,18 @@ services:
             context: php7-fpm
             args:
                 TIMEZONE: ${TIMEZONE}
+        ports:
+            - "80:8000"
         volumes:
             - ${SYMFONY_APP_PATH}:/var/www/symfony
-            - ./logs/symfony:/var/www/symfony/app/logs
+            - ./logs/symfony:/var/www/symfony/var/logs
         links:
             - redis
             - db
             - centrifugo
-    nginx:
-        container_name: sf_nginx
-        build:
-            context: nginx
-            args:
-                MAX_EXECUTION_TIME: ${MAX_EXECUTION_TIME}
-        ports:
-            - "80:80"
-        volumes_from:
-            - php
-        volumes:
-            - ./logs/nginx/:/var/log/nginx
     centrifugo:
         container_name: sf_centrifugo
-        image: fzambia/centrifugo:latest
+        image: centrifugo/centrifugo
         command: centrifugo -c config.yml -w --port=8000  --log_level=debug --debug --insecure --address=0.0.0.0
         ports:
             - "7000:8000"

@@ -26,6 +26,7 @@
         ```sh
         $ docker-compose exec php bash
         $ composer install
-        $ symfony doctrine:database:create
-        $ symfony doctrine:schema:update --force
+        $ sf doctrine:database:create
+        $ sf doctrine:schema:update --force
+        $ sf server:start 0.0.0.0:8000
         ```
