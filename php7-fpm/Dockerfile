@@ -1,40 +1,41 @@
-FROM php:7.1-fpm
+FROM php:7.2-fpm-alpine
 ARG TIMEZONE
 
-RUN apt-get update && apt-get install -y vim git unzip openssl
+RUN apk add --no-cache --virtual .persistent-deps \
+  vim git unzip openssl \
+  postgresql-dev \
+  libxml2-dev \
+  bash \
+  autoconf g++ make
 
 # Set timezone
-RUN ln -snf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && echo ${TIMEZONE} > /etc/timezone
-RUN printf '[PHP]\ndate.timezone = "%s"\n', ${TIMEZONE} > /usr/local/etc/php/conf.d/tzone.ini
+RUN ln -snf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && echo ${TIMEZONE} > /etc/timezone \
+  && printf '[PHP]\ndate.timezone = "%s"\n', ${TIMEZONE} > /usr/local/etc/php/conf.d/tzone.ini
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Install PDO extensions
-RUN apt-get install -y libpq-dev \
-  && docker-php-ext-install pdo_pgsql
+RUN docker-php-ext-install pdo_pgsql
 
 # Install redis
 RUN pecl install -o -f redis \
-  &&  rm -rf /tmp/pear \
-  &&  docker-php-ext-enable redis
+  && rm -rf /tmp/pear \
+  && docker-php-ext-enable redis
+
+RUN docker-php-ext-install soap
+
+RUN docker-php-ext-install bcmath
 
 # Install pcntl
 RUN docker-php-ext-install pcntl
 
-RUN apt-get install libxml2-dev \
-  && docker-php-ext-install soap
-
-RUN docker-php-ext-install bcmath
+COPY conf.d/* /usr/local/etc/php/conf.d/
 
 # Create an alias for Symfony3 console
 RUN echo 'alias sf="php bin/console"' >> ~/.bashrc
 
 #RUN adduser user
-
-# Install xdebug
-RUN pecl install xdebug && docker-php-ext-enable xdebug
-COPY conf.d/* /usr/local/etc/php/conf.d/
 
 #CMD ["su", "-", "user", "-c", "/bin/bash"]
 
