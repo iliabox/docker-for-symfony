@@ -20,7 +20,7 @@ RUN pecl install -o -f redis \
   &&  docker-php-ext-enable redis
 
 # Install pcntl
-#RUN docker-php-ext-install pcntl
+RUN docker-php-ext-install pcntl
 
 RUN apt-get install libxml2-dev \
   && docker-php-ext-install soap
@@ -33,8 +33,8 @@ RUN echo 'alias sf="php bin/console"' >> ~/.bashrc
 #RUN adduser user
 
 # Install xdebug
-#RUN pecl install xdebug && docker-php-ext-enable xdebug
-#COPY conf.d/* /usr/local/etc/php/conf.d/
+RUN pecl install xdebug && docker-php-ext-enable xdebug
+COPY conf.d/* /usr/local/etc/php/conf.d/
 
 #CMD ["su", "-", "user", "-c", "/bin/bash"]
 
