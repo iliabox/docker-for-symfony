@@ -3,7 +3,7 @@ version: '2'
 services:
     db:
         container_name: sf_pgsql
-        image: postgres:9
+        image: postgres:9-alpine
         volumes:
             - "./data/db:/var/lib/postgresql"
         environment:
@@ -43,7 +43,7 @@ services:
     rabbit:
         container_name: sf_rabbit
         hostname: rabbit
-        image: rabbitmq:3-management
+        image: rabbitmq:management-alpine
         environment:
             RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
             RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
