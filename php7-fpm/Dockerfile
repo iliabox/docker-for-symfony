@@ -1,40 +1,29 @@
 FROM php:7.1-fpm
 ARG TIMEZONE
 
-RUN apt-get update && apt-get install -y vim git unzip openssl libpq-dev
-
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-#RUN composer --version
+RUN apt-get update && apt-get install -y vim git unzip openssl
 
 # Set timezone
 RUN ln -snf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && echo ${TIMEZONE} > /etc/timezone
 RUN printf '[PHP]\ndate.timezone = "%s"\n', ${TIMEZONE} > /usr/local/etc/php/conf.d/tzone.ini
 
-# Install PDO extensions
-RUN docker-php-ext-install pdo_pgsql
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Install xdebug
-#RUN pecl install xdebug
-#RUN docker-php-ext-enable xdebug
-#RUN echo "error_reporting = E_ALL" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-#RUN echo "display_startup_errors = On" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-#RUN echo "display_errors = On" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-#RUN echo "xdebug.remote_enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-#RUN echo "xdebug.remote_connect_back=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-#RUN echo "xdebug.idekey=\"PHPSTORM\"" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-#RUN echo "xdebug.remote_port=9001" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+# Install PDO extensions
+RUN apt-get install -y libpq-dev \
+  && docker-php-ext-install pdo_pgsql
 
 # Install redis
 RUN pecl install -o -f redis \
-&&  rm -rf /tmp/pear \
-&&  docker-php-ext-enable redis
+  &&  rm -rf /tmp/pear \
+  &&  docker-php-ext-enable redis
 
 # Install pcntl
 #RUN docker-php-ext-install pcntl
 
-RUN apt-get install libxml2-dev
-RUN docker-php-ext-install soap
+RUN apt-get install libxml2-dev \
+  && docker-php-ext-install soap
 
 RUN docker-php-ext-install bcmath
 
@@ -42,6 +31,10 @@ RUN docker-php-ext-install bcmath
 RUN echo 'alias sf="php bin/console"' >> ~/.bashrc
 
 #RUN adduser user
+
+# Install xdebug
+#RUN pecl install xdebug && docker-php-ext-enable xdebug
+#COPY conf.d/* /usr/local/etc/php/conf.d/
 
 #CMD ["su", "-", "user", "-c", "/bin/bash"]
 
