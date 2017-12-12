@@ -27,6 +27,7 @@ RUN apk add --no-cache --virtual build-dependencies autoconf g++ make \
   && pecl install redis apcu \
   && docker-php-ext-enable redis apcu \
   && docker-php-source delete \
+  && mkdir /src && cd /src && git clone https://github.com/xdebug/xdebug.git && cd xdebug && sh ./rebuild.sh && cd / && rm -fr /src \
   && rm -rf /tmp/* \
   && apk del build-dependencies
 
