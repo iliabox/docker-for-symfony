@@ -1,12 +1,11 @@
 FROM php:7.2-fpm-alpine
 ARG TIMEZONE
 
-RUN apk add --no-cache --virtual .persistent-deps \
+RUN apk add --no-cache \
   vim git unzip openssl \
   postgresql-dev \
   libxml2-dev \
-  bash \
-  autoconf g++ make
+  bash
 
 # Set timezone
 RUN ln -snf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && echo ${TIMEZONE} > /etc/timezone \
@@ -15,28 +14,26 @@ RUN ln -snf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && echo ${TIMEZONE} >
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Install PDO extensions
-RUN docker-php-ext-install pdo_pgsql
+RUN docker-php-ext-install \
+  pdo \
+  pdo_pgsql \
+  soap \
+  bcmath \
+  opcache \
+  pcntl
 
-# Install redis
-RUN pecl install -o -f redis \
-  && rm -rf /tmp/pear \
-  && docker-php-ext-enable redis
-
-RUN docker-php-ext-install soap
-
-RUN docker-php-ext-install bcmath
-
-# Install pcntl
-RUN docker-php-ext-install pcntl
+RUN apk add --no-cache --virtual build-dependencies autoconf g++ make \
+  && docker-php-source extract \
+  && pecl install redis apcu \
+  && docker-php-ext-enable redis apcu \
+  && docker-php-source delete \
+  && rm -rf /tmp/* \
+  && apk del build-dependencies
 
 COPY conf.d/* /usr/local/etc/php/conf.d/
 
-# Create an alias for Symfony3 console
+USER www-data
+
 RUN echo 'alias sf="php bin/console"' >> ~/.bashrc
-
-#RUN adduser user
-
-#CMD ["su", "-", "user", "-c", "/bin/bash"]
 
 WORKDIR /var/www/symfony
