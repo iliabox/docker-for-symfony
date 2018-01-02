@@ -30,3 +30,9 @@
         $ sf doctrine:schema:update --force
         $ sf server:start 0.0.0.0:8000
         ```
+
+5. Yarn
+    ```sh
+    $ docker-compose run --rm nodejs yarn install
+    $ docker-compose run --rm nodejs yarn run [command]
+    ```

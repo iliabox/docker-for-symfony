@@ -32,6 +32,13 @@ services:
             - redis
             - db
             - centrifugo
+    nodejs:
+        container_name: sf_nodejs
+        image: node:alpine
+        user: "node"
+        volumes:
+            - ${SYMFONY_APP_PATH}:/var/www/symfony
+        working_dir: /var/www/symfony
     centrifugo:
         container_name: sf_centrifugo
         image: centrifugo/centrifugo
